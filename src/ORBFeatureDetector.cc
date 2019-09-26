@@ -139,6 +139,7 @@ int ORBFeatureDetector::Detect(const cv::Mat& image,
   CHECK(!image.empty()) << "Empty image.";
   CHECK_EQ(image.rows, height_);
   CHECK_EQ(image.cols, width_) << "Size change on the fly is not considered.";
+  image.copyTo(image_);
 
   int number_of_features = -1;
 
@@ -210,12 +211,12 @@ void ORBFeatureDetector::Detect(
              &descriptors.at<uint8_t>(i, 0), kDescriptorLengthInBytes);
     }
   }
-  for (int i = 0; i < number_of_features; i++) {
-    cv::circle(image,
-               cv::Point(current_measurements->operator()(0, i),
-                         current_measurements->operator()(1, i)),
-               5, cv::Scalar(0, 255, 255));
-  }
-  cv::imshow("features", image);
-  cv::waitKey(10);
+  // for (int i = 0; i < number_of_features; i++) {
+  //   cv::circle(image,
+  //              cv::Point(current_measurements->operator()(0, i),
+  //                        current_measurements->operator()(1, i)),
+  //              5, cv::Scalar(0, 255, 255));
+  // }
+  // cv::imshow("features", image);
+  // cv::waitKey(10);
 }

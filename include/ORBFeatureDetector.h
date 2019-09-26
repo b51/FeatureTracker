@@ -58,6 +58,8 @@ class ORBFeatureDetector : public FeatureDetectorBase {
 
   void SetNumberOfLevels(int number_of_levels);
 
+  const cv::Mat& GetCvImage() const { return image_; }
+
   ORBFeatureDetector(const ORBFeatureDetector& d);
 
   ORBFeatureDetector& operator=(const ORBFeatureDetector& d);

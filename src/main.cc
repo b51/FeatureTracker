@@ -15,9 +15,9 @@
 #include <iostream>
 #include <memory>
 
-#include "FeatureDescriptor.h"
-#include "FeatureDetectorBase.h"
-#include "ORBFeatureDetector.h"
+// #include "FeatureDescriptor.h"
+// #include "FeatureDetectorBase.h"
+#include "ORBFeatureTracker.h"
 
 DEFINE_string(
     image_dir,
@@ -71,15 +71,15 @@ int main(int argc, char* argv[]) {
   cv::Mat image = cv::imread(FLAGS_image_dir + "/" + image_filenames[0],
                              CV_LOAD_IMAGE_UNCHANGED);
 
-  std::shared_ptr<FeatureDetectorBase> detector;
-  detector = std::make_shared<ORBFeatureDetector>();
-  detector->Init(image.cols, image.rows, FLAGS_max_number_of_features);
+  std::shared_ptr<ORBFeatureTracker> tracker;
+  tracker = std::make_shared<ORBFeatureTracker>();
+  tracker->Init(image.cols, image.rows, FLAGS_max_number_of_features);
 
   // coordinates in pixel plane
-  Eigen::Matrix2Xd measurements;
-  std::vector<float> feature_orientations;
-  std::vector<float> feature_scales;
-  FeatureDescriptor feature_descriptors;
+  Eigen::Matrix2Xd current_measurements;
+  Eigen::Matrix2Xd previous_measurements;
+  std::vector<int> feature_ids;
+  int i = 0;
 
   for (auto image_filename : image_filenames) {
     image = cv::imread(FLAGS_image_dir + "/" + image_filename,
@@ -89,8 +89,19 @@ int main(int argc, char* argv[]) {
       LOG(FATAL) << "Failed to load image at: " << FLAGS_image_dir << "/"
                  << image_filename;
     }
-    detector->Detect(image, &measurements, &feature_orientations,
-                     &feature_scales, &feature_descriptors);
-    LOG(INFO) << "Feature size: " << feature_scales.size();
+    tracker->Track(image, &current_measurements, &previous_measurements,
+                   &feature_ids);
+    /*
+    for (size_t ii = 0; ii < feature_ids.size(); ii++)
+      LOG(INFO) << "id: " << feature_ids[ii] << ", ["
+                << previous_measurements.col(ii)[0] << ", "
+                << previous_measurements.col(ii)[1] << "], ["
+                << current_measurements.col(ii)[0] << ", "
+                << current_measurements.col(ii)[1] << " ]";
+    */
+    // detector->Detect(image, &measurements, &feature_orientations,
+    //                 &feature_scales, &feature_descriptors);
+    VLOG(5) << "Feature size: " << current_measurements.size();
+    i++;
   }
 }

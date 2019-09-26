@@ -37,6 +37,8 @@ add_executable(${PROJECT_NAME}
   src/main.cc
   src/FeatureDescriptor.cc
   src/ORBFeatureDetector.cc
+  src/ORBFeatureMatcher.cc
+  src/ORBFeatureTracker.cc
 )
 
 ## Specify libraries to link a library or executable target against
