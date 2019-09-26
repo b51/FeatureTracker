@@ -13,6 +13,7 @@
 #define FEATURE_TRACKER_FEATURE_DETECTOR_BASE_H_
 
 #include <Eigen/Core>
+#include <opencv2/opencv.hpp>
 
 #include "FeatureDescriptor.h"
 
@@ -21,25 +22,22 @@ class FeatureDetectorBase {
   FeatureDetectorBase(){};
   virtual ~FeatureDetectorBase(){};
 
-  virtual void Init(int width, int height, int stride,
-                    int max_number_of_features, bool rotation_invariant) = 0;
+  virtual void Init(int width, int height, int max_number_of_features) = 0;
 
-  virtual void FeatureDetect(
-      const unsigned char* im, Eigen::Matrix2Xd* current_measurements,
-      std::vector<float>* current_feature_orientations,
-      std::vector<float>* current_feature_scales,
-      FeatureDescriptor* current_feature_descriptors) = 0;
+  virtual void Detect(const cv::Mat& image,
+                      Eigen::Matrix2Xd* current_measurements,
+                      std::vector<float>* current_feature_orientations,
+                      std::vector<float>* current_feature_scales,
+                      FeatureDescriptor* current_feature_descriptors) = 0;
 
   virtual bool IsInitialized() const = 0;
   virtual int GetHeight() const = 0;
   virtual int GetWidth() const = 0;
-  virtual int GetRowStride() const = 0;
   virtual int GetMaxNumberOfFeatures() const = 0;
 
  private:
-  FeatureDetectorBase(const feature_tracker::FeatureDetectorBase& ft) = delete;
-  FeatureDetectorBase& operator=(
-      const feature_tracker::FeatureDetectorBase& ft) = delete;
+  FeatureDetectorBase(const FeatureDetectorBase& fd) = delete;
+  FeatureDetectorBase& operator=(const FeatureDetectorBase& fd) = delete;
 };
 
 #endif
