@@ -26,16 +26,9 @@ DEFINE_string(
 DEFINE_int32(max_number_of_features, 500, "max number of detected features");
 
 void LoadImages(const std::string& file_name,
-                std::vector<std::string>& image_filenames,
-                std::vector<double>& timestamps) {
+                std::vector<std::string>& image_filenames) {
   std::ifstream f;
   f.open(file_name.c_str());
-
-  // skip first three lines
-  std::string s0;
-  getline(f, s0);
-  getline(f, s0);
-  getline(f, s0);
 
   while (!f.eof()) {
     std::string s;
@@ -43,10 +36,7 @@ void LoadImages(const std::string& file_name,
     if (!s.empty()) {
       std::stringstream ss;
       ss << s;
-      double t;
       std::string image_filename;
-      ss >> t;
-      timestamps.push_back(t);
       ss >> image_filename;
       image_filenames.push_back(image_filename);
     }
@@ -61,9 +51,8 @@ int main(int argc, char* argv[]) {
   FLAGS_colorlogtostderr = true;
 
   std::vector<std::string> image_filenames;
-  std::vector<double> timestamps;
   std::string string_file = FLAGS_image_dir + "/rgb.txt";
-  LoadImages(string_file, image_filenames, timestamps);
+  LoadImages(string_file, image_filenames);
 
   LOG(INFO) << "Start processing sequence ...";
   LOG(INFO) << "Images in the sequence: " << image_filenames.size();

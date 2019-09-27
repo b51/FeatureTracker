@@ -16,7 +16,7 @@
 #include <unordered_set>
 
 DEFINE_int32(dist_type, 4, "1=NORM_L1, 2=NORM_L2, 4=NORM_HAMMING.");
-DEFINE_double(refine_dist, 100.0, "Reject distance > refine_dist matches.");
+DEFINE_double(refine_dist, 64.0, "Reject distance > refine_dist matches.");
 
 ORBFeatureMatcher::ORBFeatureMatcher()
     : dist_type_(DistType::NORM_HAMMING),
