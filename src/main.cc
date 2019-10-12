@@ -14,17 +14,18 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <opencv2/opencv.hpp>
 
-// #include "FeatureDescriptor.h"
-// #include "FeatureDetectorBase.h"
 #include "ORBFeatureTracker.h"
 
 DEFINE_string(
     image_dir,
     "/home/ubuntu/Documents/VioBag/downloads/rgbd_dataset_freiburg2_desk",
     "Where to find images");
+DEFINE_string(image_suffix, ".jpg", "Suffix of images, default: .jpg");
 DEFINE_int32(max_number_of_features, 500, "max number of detected features");
 
+/*
 void LoadImages(const std::string& file_name,
                 std::vector<std::string>& image_filenames) {
   std::ifstream f;
@@ -42,6 +43,23 @@ void LoadImages(const std::string& file_name,
     }
   }
 }
+*/
+
+void LoadImages(const std::string& dir_name,
+                std::vector<std::string>& image_filenames) {
+  std::vector<cv::String> files;
+  cv::glob(dir_name, files);
+  for (auto file : files) {
+    std::string image_file(file);
+    size_t index = image_file.rfind(".");
+    if (index != std::string::npos) {
+      std::string suffix = image_file.substr(index);
+      if (suffix.compare(FLAGS_image_suffix) == 0) {
+        image_filenames.emplace_back(image_file);
+      }
+    }
+  }  // end of for loop
+}
 
 int main(int argc, char* argv[]) {
   google::InitGoogleLogging(argv[0]);
@@ -51,14 +69,15 @@ int main(int argc, char* argv[]) {
   FLAGS_colorlogtostderr = true;
 
   std::vector<std::string> image_filenames;
-  std::string string_file = FLAGS_image_dir + "/rgb.txt";
+  std::string string_file = FLAGS_image_dir;// + "/rgb.txt";
   LoadImages(string_file, image_filenames);
 
   LOG(INFO) << "Start processing sequence ...";
   LOG(INFO) << "Images in the sequence: " << image_filenames.size();
 
-  cv::Mat image = cv::imread(FLAGS_image_dir + "/" + image_filenames[0],
-                             CV_LOAD_IMAGE_UNCHANGED);
+  // cv::Mat image = cv::imread(FLAGS_image_dir + "/" + image_filenames[0],
+  //                            CV_LOAD_IMAGE_UNCHANGED);
+  cv::Mat image = cv::imread(image_filenames[0], CV_LOAD_IMAGE_UNCHANGED);
 
   std::shared_ptr<ORBFeatureTracker> tracker;
   tracker = std::make_shared<ORBFeatureTracker>();
@@ -71,8 +90,7 @@ int main(int argc, char* argv[]) {
   int i = 0;
 
   for (auto image_filename : image_filenames) {
-    image = cv::imread(FLAGS_image_dir + "/" + image_filename,
-                       CV_LOAD_IMAGE_UNCHANGED);
+    image = cv::imread(image_filename, CV_LOAD_IMAGE_UNCHANGED);
     if (image.channels() > 1) cv::cvtColor(image, image, CV_BGR2GRAY);
     if (image.empty()) {
       LOG(FATAL) << "Failed to load image at: " << FLAGS_image_dir << "/"
