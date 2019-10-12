@@ -14,6 +14,7 @@
 
 #include "FeatureDetectorBase.h"
 
+#include <gflags/gflags.h>
 #include <opencv2/opencv.hpp>
 
 class ORBFeatureDetector : public FeatureDetectorBase {
@@ -28,10 +29,10 @@ class ORBFeatureDetector : public FeatureDetectorBase {
             int patch_size, bool refine_corners);
 
   virtual void Detect(const cv::Mat& image,
-                      Eigen::Matrix2Xd* current_measurements,
+                      Eigen::Matrix2Xf* current_measurements,
                       std::vector<float>* current_feature_orientations,
                       std::vector<float>* current_feature_scales,
-                      FeatureDescriptor* current_feature_descriptors);
+                      FeatureDescriptoru* current_feature_descriptors);
 
   int Detect(const cv::Mat& image, std::vector<cv::KeyPoint>* feature_locations,
              cv::Mat* descriptors);
@@ -42,7 +43,9 @@ class ORBFeatureDetector : public FeatureDetectorBase {
 
   inline virtual int GetHeight() const { return height_; }
 
-  inline int GetMaxNumberOfFeatures() const { return max_number_of_features_; }
+  inline virtual int GetMaxNumberOfFeatures() const {
+    return max_number_of_features_;
+  }
 
   inline float GetScaleFactor() const { return scale_factor_; }
 

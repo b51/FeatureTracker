@@ -12,6 +12,7 @@
 #include "ORBFeatureDetector.h"
 
 #include <glog/logging.h>
+#include <gflags/gflags.h>
 
 DEFINE_double(scale_factor, 1.1f, "Scale increment");
 DEFINE_int32(number_of_levels, 8, "Number of scales.");
@@ -157,10 +158,10 @@ int ORBFeatureDetector::Detect(const cv::Mat& image,
 }
 
 void ORBFeatureDetector::Detect(
-    const cv::Mat& image, Eigen::Matrix2Xd* current_measurements,
+    const cv::Mat& image, Eigen::Matrix2Xf* current_measurements,
     std::vector<float>* current_feature_orientations,
     std::vector<float>* current_feature_scales,
-    FeatureDescriptor* current_feature_descriptors) {
+    FeatureDescriptoru* current_feature_descriptors) {
   CHECK_NOTNULL(current_measurements);
   CHECK_NOTNULL(current_feature_orientations);
   CHECK_NOTNULL(current_feature_scales);

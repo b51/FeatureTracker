@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(FeatureTracker)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+add_definitions(-std=c++11)
 
 #########################################################################
 if (NOT CMAKE_BUILD_TYPE)
@@ -17,8 +17,15 @@ else(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif(CMAKE_BUILD_TYPE STREQUAL "Release")
 #########################################################################
 
+#find_package(catkin REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(OpenMP REQUIRED)
+
+#catkin_package(
+#  INCLUDE_DIRS include
+#  #CATKIN_DEPENDS
+#)
 
 include_directories(
   include
@@ -27,16 +34,15 @@ include_directories(
 )
 
 ## Declare a C++ executable
-add_executable(${PROJECT_NAME}
-  src/main.cc
-  src/FeatureDescriptor.cc
+add_executable(${PROJECT_NAME}_orb
+  src/main_track_orb.cc
   src/ORBFeatureDetector.cc
   src/ORBFeatureMatcher.cc
   src/ORBFeatureTracker.cc
 )
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME}_orb
   ${OpenCV_LIBS}
   glog
   gflags

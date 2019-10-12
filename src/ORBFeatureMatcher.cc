@@ -12,6 +12,7 @@
 #include "ORBFeatureMatcher.h"
 
 #include <glog/logging.h>
+#include <gflags/gflags.h>
 #include <unordered_map>
 #include <unordered_set>
 

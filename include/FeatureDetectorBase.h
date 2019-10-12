@@ -28,7 +28,11 @@ class FeatureDetectorBase {
                       Eigen::Matrix2Xd* current_measurements,
                       std::vector<float>* current_feature_orientations,
                       std::vector<float>* current_feature_scales,
-                      FeatureDescriptor* current_feature_descriptors) = 0;
+                      FeatureDescriptoru* current_feature_descriptors) {}
+
+  virtual void Detect(const cv::Mat& image,
+                      Eigen::Matrix2Xf* current_measurements,
+                      FeatureDescriptorf* current_feature_descriptors) {}
 
   virtual bool IsInitialized() const = 0;
   virtual int GetHeight() const = 0;

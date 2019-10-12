@@ -2,7 +2,7 @@
  *
  *              Author: b51
  *                Mail: b51live@gmail.com
- *            FileName: main.cc
+ *            FileName: main_track_orb.cc
  *
  *          Created On: Wed 25 Sep 2019 04:25:40 PM CST
  *     Licensed under The MIT License [see LICENSE for details]
@@ -30,6 +30,7 @@ void LoadImages(const std::string& file_name,
                 std::vector<std::string>& image_filenames) {
   std::ifstream f;
   f.open(file_name.c_str());
+  if (!f.good()) LOG(FATAL) << file_name << " not exists";
 
   while (!f.eof()) {
     std::string s;
