@@ -42,45 +42,45 @@ void ORBFeatureTracker::LocalInit(int width, int height) {
   width_ = width;
   height_ = height;
 
-  prev_feature_locations_.reserve(1000);
-  curr_feature_locations_.reserve(1000);
+  previous_feature_locations_.reserve(1000);
+  current_feature_locations_.reserve(1000);
   matches_.reserve(1000);
-  prev_track_ids_.reserve(1000);
-  curr_track_ids_.reserve(1000);
+  previous_track_ids_.reserve(1000);
+  current_track_ids_.reserve(1000);
 
   detector_.reset(new ORBFeatureDetector);
   matcher_.reset(new ORBFeatureMatcher);
 }
 
 void ORBFeatureTracker::Track(const cv::Mat& image,
-                              Eigen::Matrix2Xd* curr_measurements,
-                              Eigen::Matrix2Xd* prev_measurements,
+                              Eigen::Matrix2Xf* current_measurements,
+                              Eigen::Matrix2Xf* previous_measurements,
                               std::vector<int>* feature_ids) {
-  std::swap(prev_feature_locations_, curr_feature_locations_);
-  curr_feature_locations_.resize(0);
+  std::swap(previous_feature_locations_, current_feature_locations_);
+  current_feature_locations_.resize(0);
 
-  std::swap(prev_track_ids_, curr_track_ids_);
-  cv::swap(curr_descriptor_, prev_descriptor_);
+  std::swap(previous_track_ids_, current_track_ids_);
+  cv::swap(current_descriptors_, previous_descriptors_);
 
   int number_of_features =
-      detector_->Detect(image, &curr_feature_locations_, &curr_descriptor_);
-  curr_image_ = detector_->GetCvImage();
+      detector_->Detect(image, &current_feature_locations_, &current_descriptors_);
+  current_image_ = detector_->GetCvImage();
 
-  prev_image_ = detector_->GetCvImage();
+  previous_image_ = detector_->GetCvImage();
 
-  if (prev_feature_locations_.size() > 0 and number_of_features > 0) {
-    matcher_->Match(curr_descriptor_, prev_descriptor_, &matches_);
+  if (previous_feature_locations_.size() > 0 and number_of_features > 0) {
+    matcher_->Match(current_descriptors_, previous_descriptors_, &matches_);
   }
-  curr_track_ids_.clear();
-  curr_track_ids_.resize(curr_feature_locations_.size(), -1);
+  current_track_ids_.clear();
+  current_track_ids_.resize(current_feature_locations_.size(), -1);
 
   std::vector<cv::DMatch> checked_matches;
   cv::Point2f diff(0., 0.);
   checked_matches.reserve(matches_.size());
   VLOG(4) << "original matches size: " << matches_.size();
   for (const auto& match : matches_) {
-    diff = prev_feature_locations_[match.trainIdx].pt -
-           curr_feature_locations_[match.queryIdx].pt;
+    diff = previous_feature_locations_[match.trainIdx].pt -
+           current_feature_locations_[match.queryIdx].pt;
     if (std::fabs(diff.x) < width_ and std::fabs(diff.y) < height_) {
       checked_matches.push_back(match);
     }
@@ -89,49 +89,67 @@ void ORBFeatureTracker::Track(const cv::Mat& image,
   std::swap(matches_, checked_matches);
 
   for (const auto& match : matches_) {
-    curr_track_ids_[match.queryIdx] = prev_track_ids_[match.trainIdx];
+    current_track_ids_[match.queryIdx] = previous_track_ids_[match.trainIdx];
   }
 
-  for (auto& id : curr_track_ids_) {
+  for (auto& id : current_track_ids_) {
     if (id == -1) {
       id = ++current_track_id_;
     }
   }
 
-  curr_measurements->resize(2, matches_.size());
-  prev_measurements->resize(2, matches_.size());
+  current_measurements->resize(2, matches_.size());
+  previous_measurements->resize(2, matches_.size());
 
   feature_ids->clear();
   for (size_t i = 0; i < matches_.size(); i++) {
-    curr_measurements->operator()(0, i) =
-        curr_feature_locations_[matches_[i].queryIdx].pt.x;
-    curr_measurements->operator()(1, i) =
-        curr_feature_locations_[matches_[i].queryIdx].pt.y;
+    current_measurements->operator()(0, i) =
+        current_feature_locations_[matches_[i].queryIdx].pt.x;
+    current_measurements->operator()(1, i) =
+        current_feature_locations_[matches_[i].queryIdx].pt.y;
 
-    prev_measurements->operator()(0, i) =
-        prev_feature_locations_[matches_[i].trainIdx].pt.x;
-    prev_measurements->operator()(1, i) =
-        prev_feature_locations_[matches_[i].trainIdx].pt.y;
+    previous_measurements->operator()(0, i) =
+        previous_feature_locations_[matches_[i].trainIdx].pt.x;
+    previous_measurements->operator()(1, i) =
+        previous_feature_locations_[matches_[i].trainIdx].pt.y;
 
-    feature_ids->push_back(curr_track_ids_[matches_[i].queryIdx]);
+    feature_ids->push_back(current_track_ids_[matches_[i].queryIdx]);
   }
-  if (prev_descriptor_.rows > 0 && number_of_features > 0) {
-    Display();
+}
+
+void ORBFeatureTracker::GetFeatureDescriptor(FeatureDescriptoru* descriptors) {
+  int descriptor_size = current_descriptors_.cols;
+  int number_of_features = current_descriptors_.rows;
+  descriptors->Configure(descriptor_size, number_of_features);
+  descriptors->Resize(number_of_features);
+  if (current_descriptors_.isContinuous()) {
+    memcpy(descriptors->descriptor(0), current_descriptors_.data,
+           descriptor_size * number_of_features);
+  } else {
+    for (int i = 0; i < number_of_features; i++) {
+      memcpy(descriptors->descriptor(i),
+             &current_descriptors_.at<uint8_t>(i, 0), descriptor_size);
+    }
   }
-  curr_image_.copyTo(prev_image_);
 }
 
 void ORBFeatureTracker::Display() {
   static int iter = 0;
   cv::Mat image_matches;
   if (iter > 0) {
-    cv::Mat image_matches;
-    cv::drawMatches(curr_image_, curr_feature_locations_, prev_image_,
-                    prev_feature_locations_, matches_, image_matches,
+    cv::drawMatches(current_image_, current_feature_locations_, previous_image_,
+                    previous_feature_locations_, matches_, image_matches,
                     cv::Scalar(255, 0, 0), cv::Scalar::all(-1),
                     std::vector<char>(), 0);
     cv::imshow("debug_image", image_matches);
+    cv::waitKey(1);
+    /*  save images
+    std::stringstream ss;
+    ss << std::setfill('0') << std::setw(6) << iter;
+    std::string img_name = "image_" + ss.str() + ".jpg";
+    cv::imwrite(img_name, image_matches);
+    */
   }
   iter++;
-  cv::waitKey(1);
+  current_image_.copyTo(previous_image_);
 }

@@ -144,9 +144,7 @@ int ORBFeatureDetector::Detect(const cv::Mat& image,
 
   int number_of_features = -1;
 
-  VLOG(3) << "Detect original size image";
   feature_locations->resize(0);
-  VLOG(3) << image.cols << " " << image.rows;
   detector_->detectAndCompute(image, mask_, *feature_locations, *descriptors);
   number_of_features = feature_locations->size();
   VLOG(3) << "number_of_features: " << number_of_features;

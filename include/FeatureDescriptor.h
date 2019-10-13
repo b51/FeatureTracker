@@ -12,6 +12,7 @@
 #ifndef BINARY_FEATURE_STORE_H_
 #define BINARY_FEATURE_STORE_H_
 
+#include <glog/logging.h>
 #include <Eigen/Core>
 #include <algorithm>
 #include <random>
