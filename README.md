@@ -20,3 +20,9 @@ make -j4
 ```bash
 ./FeatureTracker --image_dir /path/to/images_dir [--image_suffix .jpg]
 ```
+
+**ORB Tracker**
+
+Kitti:
+
+<img src="utils/orb_track.gif" width="480">
