@@ -18,7 +18,7 @@
 
 #include "FeatureTrackerBase.h"
 #include "ORBFeatureTracker.h"
-// #include "SuperPointFeatureTracker.h"
+#include "SuperPointFeatureTracker.h"
 
 DEFINE_string(
     image_dir,
@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
     tracker = std::make_shared<ORBFeatureTracker>();
   } else if (FLAGS_type.compare("sp") == 0 or
              FLAGS_type.compare("superpoint") == 0) {
-    // tracker = std::make_shared<SuperPointFeatureTracker>();
+    tracker = std::make_shared<SuperPointFeatureTracker>();
   } else {
     LOG(FATAL) << "Feature type is not supported, only support orb/sp";
   }
@@ -100,9 +100,9 @@ int main(int argc, char* argv[]) {
           ->GetFeatureDescriptor(&descriptors);
     } else if (FLAGS_type.compare("sp") == 0 or
                FLAGS_type.compare("superpoint") == 0) {
-      // FeatureDescriptorf descriptors;
-      // std::dynamic_pointer_cast<SuperPointFeatureTracker>(tracker)
-      //     ->GetFeatureDescriptor(&descriptors);
+      FeatureDescriptorf descriptors;
+      std::dynamic_pointer_cast<SuperPointFeatureTracker>(tracker)
+          ->GetFeatureDescriptor(&descriptors);
     }
   }
 }
