@@ -22,17 +22,16 @@ find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(OpenMP REQUIRED)
 
-######## LibPytorch ########
-#find_package(PythonLibs 3.7 REQUIRED)
-#execute_process(COMMAND
-#  python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
-#  OUTPUT_VARIABLE
-#  PYTHON_SITE_PACKAGES
-#  OUTPUT_STRIP_TRAILING_WHITESPACE
-#)
-#list(APPEND CMAKE_PREFIX_PATH ${PYTHON_SITE_PACKAGES}/torch/share/cmake)
+find_package(PythonLibs 3.7 REQUIRED)
+execute_process(COMMAND
+  python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
+  OUTPUT_VARIABLE
+  PYTHON_SITE_PACKAGES
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+list(APPEND CMAKE_PREFIX_PATH ${PYTHON_SITE_PACKAGES}/torch/share/cmake)
 #list(APPEND CMAKE_PREFIX_PATH "~/.local/lib/python3.6/site-packages/torch/share/cmake")
-#find_package(Torch REQUIRED)
+find_package(Torch REQUIRED)
 
 #catkin_package(
 #  INCLUDE_DIRS include
@@ -45,36 +44,21 @@ include_directories(
   ${EIGEN3_INCLUDE_DIRS}
 )
 
-### Declare a C++ executable
-#add_executable(${PROJECT_NAME}_orb
-#  src/main_track_orb.cc
-#  src/ORBFeatureDetector.cc
-#  src/ORBFeatureMatcher.cc
-#  src/ORBFeatureTracker.cc
-#)
-#
-### Specify libraries to link a library or executable target against
-#target_link_libraries(${PROJECT_NAME}_orb
-#  ${OpenCV_LIBS}
-#  glog
-#  gflags
-#)
-
 ## Declare a C++ executable
 add_executable(${PROJECT_NAME}
   src/main_track.cc
   src/ORBFeatureDetector.cc
   src/ORBFeatureMatcher.cc
   src/ORBFeatureTracker.cc
-  #  src/SuperPointFeatureDetector.cc
-  #  src/SuperPointFeatureMatcher.cc
-  #  src/SuperPointFeatureTracker.cc
+  src/SuperPointFeatureDetector.cc
+  src/SuperPointFeatureMatcher.cc
+  src/SuperPointFeatureTracker.cc
 )
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME} PUBLIC
   OpenMP::OpenMP_CXX
-  #${TORCH_LIBRARIES}
+  ${TORCH_LIBRARIES}
   ${OpenCV_LIBS}
   glog
   gflags
