@@ -1,14 +1,3 @@
-/*************************************************************************
- *
- *              Author: b51
- *                Mail: b51live@gmail.com
- *            FileName: FeatureDescriptor.h
- *
- *          Created On: Sat 29 Jun 2019 06:04:12 PM CST
- *     Licensed under The MIT License [see LICENSE for details]
- *
- ************************************************************************/
-
 #ifndef BINARY_FEATURE_STORE_H_
 #define BINARY_FEATURE_STORE_H_
 
@@ -62,22 +51,18 @@ class FeatureDescriptor {
   inline uint32_t DescriptorSize() const { return descriptor_size_; }
 
   inline ScalarType* descriptor(uint32_t index) {
-    // CHECK_LT(index, num_features_);
     return &descriptor_data_[index * descriptor_size_];
   }
 
   inline const ScalarType* descriptor(uint32_t index) const {
-    // CHECK_LT(index, num_features_);
     return &descriptor_data_[index * descriptor_size_];
   }
 
   inline void SetDescriptorToZero(uint32_t index) {
-    // CHECK_LT(index, num_features_);
     memset(descriptor(index), 0, descriptor_size_);
   }
 
   inline void SetDescriptorRandom(uint32_t index, int seed) {
-    // CHECK_LT(index, num_features_);
     std::mt19937 generator(seed);
     ScalarType* data = descriptor(index);
     for (size_t i = 0; i < descriptor_size_; ++i) {

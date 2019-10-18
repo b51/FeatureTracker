@@ -99,14 +99,11 @@ ORBFeatureDetector& ORBFeatureDetector::operator=(const ORBFeatureDetector& d) {
 }
 
 void ORBFeatureDetector::SetMask(const cv::Mat& mat) {
-  CHECK_EQ(mat.cols, mask_.cols);
-  CHECK_EQ(mat.rows, mask_.rows);
   mask_ = mat;
 }
 
 void ORBFeatureDetector::SetNumberOfLevels(int number_of_levels) {
   if (number_of_levels != number_of_levels_) {
-    CHECK(IsInitialized()) << "Please initialize first";
     number_of_levels_ = number_of_levels;
     detector_ = cv::ORB::create(max_number_of_features_, scale_factor_,
                                 number_of_levels_, edge_dist_, 0, 2,
@@ -116,8 +113,6 @@ void ORBFeatureDetector::SetNumberOfLevels(int number_of_levels) {
 
 void ORBFeatureDetector::Refine(const cv::Mat& image,
                                 std::vector<cv::KeyPoint>* feature_locations) {
-  CHECK_NOTNULL(feature_locations);
-  CHECK(IsInitialized()) << "Please initialize first";
   std::vector<cv::Point2f> locs;
   locs.resize(feature_locations->size());
   for (size_t i = 0; i < feature_locations->size(); i++) {
@@ -134,12 +129,6 @@ void ORBFeatureDetector::Refine(const cv::Mat& image,
 int ORBFeatureDetector::Detect(const cv::Mat& image,
                                std::vector<cv::KeyPoint>* feature_locations,
                                cv::Mat* descriptors) {
-  CHECK(IsInitialized());
-  CHECK_NOTNULL(descriptors);
-  CHECK_NOTNULL(feature_locations);
-  CHECK(!image.empty()) << "Empty image.";
-  CHECK_EQ(image.rows, height_);
-  CHECK_EQ(image.cols, width_) << "Size change on the fly is not considered.";
   image.copyTo(image_);
 
   int number_of_features = -1;
@@ -160,14 +149,9 @@ void ORBFeatureDetector::Detect(
     std::vector<float>* current_feature_orientations,
     std::vector<float>* current_feature_scales,
     FeatureDescriptoru* current_feature_descriptors) {
-  CHECK_NOTNULL(current_measurements);
-  CHECK_NOTNULL(current_feature_orientations);
-  CHECK_NOTNULL(current_feature_scales);
-  CHECK_NOTNULL(current_feature_descriptors);
   std::vector<cv::KeyPoint> feature_locations;
   cv::Mat descriptors;
   int number_of_features = Detect(image, &feature_locations, &descriptors);
-  CHECK_EQ(descriptors.cols, kDescriptorLengthInBytes);
 
   // Prepare output
   current_measurements->resize(2, number_of_features);
@@ -192,15 +176,10 @@ void ORBFeatureDetector::Detect(
   // Assign orientation and scale
   for (int i = 0; i < number_of_features; ++i) {
     (*current_feature_orientations)[i] = feature_locations[i].angle;
-    CHECK_LT(feature_locations[i].octave, number_of_levels_);
     (*current_feature_scales)[i] = all_scales[feature_locations[i].octave];
   }
 
-  CHECK_EQ(descriptors.type(), CV_8UC1);
-
   if (descriptors.isContinuous()) {
-    CHECK_EQ(descriptors.at<uint8_t>(0, 1), descriptors.data[1])
-        << " not row major";
     // if continuous and row major
     memcpy(current_feature_descriptors->descriptor(0), descriptors.data,
            kDescriptorLengthInBytes * number_of_features);
