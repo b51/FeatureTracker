@@ -27,7 +27,7 @@ DEFINE_string(
 DEFINE_string(image_suffix, ".jpg", "Suffix of images, default: .jpg");
 DEFINE_int32(max_number_of_features, 500, "max number of detected features");
 
-DEFINE_string(type, "orb", "Feature detector type[orb, sp], default: orb");
+DEFINE_string(type, "sp", "Feature detector type[orb, sp], default: orb");
 
 void LoadImages(const std::string& dir_name,
                 std::vector<std::string>& image_filenames) {
@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
   LoadImages(string_file, image_filenames);
 
   std::cout << "Usage: " << argv[0]
-            << " --image_dir path/to/images --suffix .jpg/.png --model"
+            << " --image_dir path/to/images --image_suffix .jpg/.png --model"
                " path/to/model --type orb/sp [--model path/to/sp_model --W"
                " sp_input_W --H sp_input_H --CUDA device_num]"
             << std::endl;
